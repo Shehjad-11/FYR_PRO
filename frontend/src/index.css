@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cyber-dark text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500 selection:text-white;
+  }
+}
+
+.glass-panel {
+  @apply bg-cyber-card/80 backdrop-blur-md border border-cyber-border rounded-xl shadow-xl;
+}
+
+.glass-button {
+  @apply bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-medium px-4 py-2 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95;
+}
