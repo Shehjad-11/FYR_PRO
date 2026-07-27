@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables / secrets
+backend/.env
+
+# SQLite database (contains real data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Vite cache
+frontend/.vite/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Docker
+.dockerignore
