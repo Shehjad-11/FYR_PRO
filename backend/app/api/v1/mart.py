@@ -16,8 +16,8 @@ from app.models.mart import Product, Category, Customer, Bill, BillItem
 from app.schemas.mart import (
     ProductCreate, ProductUpdate, ProductResponse,
     CategoryCreate, CategoryResponse,
-    CustomerCreate, CustomerResponse,
-    BillCreate, BillResponse
+    CustomerCreate, CustomerResponse, CustomerDetailResponse, UdharPaymentCreate,
+    BillCreate, BillResponse, ReportSummaryResponse, PaymentModeSummary, TopProductSummary, SalesTimelinePoint
 )
 from app.api.v1.auth import get_current_user
 
@@ -98,6 +98,47 @@ async def list_products(
     return [ProductResponse.model_validate(p) for p in products]
 
 
+@router.put("/products/{product_id}", response_model=ProductResponse)
+async def update_product(
+    product_id: str,
+    data: ProductUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Product).where(Product.id == product_id, Product.organization_id == current_user.organization_id)
+    )
+    product = result.scalar_one_or_none()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(product, key, value)
+        
+    await db.commit()
+    await db.refresh(product)
+    return ProductResponse.model_validate(product)
+
+
+@router.delete("/products/{product_id}")
+async def delete_product(
+    product_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Product).where(Product.id == product_id, Product.organization_id == current_user.organization_id)
+    )
+    product = result.scalar_one_or_none()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    product.is_active = False
+    await db.commit()
+    return {"status": "success", "message": "Product deactivated successfully"}
+
+
 @router.get("/products/barcode/{barcode}", response_model=ProductResponse)
 async def get_product_by_barcode(
     barcode: str,
@@ -150,6 +191,154 @@ async def list_customers(
     result = await db.execute(query)
     customers = result.scalars().all()
     return [CustomerResponse.model_validate(c) for c in customers]
+
+
+@router.get("/customers/{customer_id}", response_model=CustomerDetailResponse)
+async def get_customer_details(
+    customer_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Customer).where(Customer.id == customer_id, Customer.organization_id == current_user.organization_id)
+    )
+    customer = result.scalar_one_or_none()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    bills_res = await db.execute(
+        select(Bill).where(Bill.customer_id == customer_id, Bill.organization_id == current_user.organization_id).order_by(Bill.created_at.desc())
+    )
+    bills = bills_res.scalars().all()
+    
+    bills_list = []
+    for b in bills:
+        items_res = await db.execute(select(BillItem).where(BillItem.bill_id == b.id))
+        items = items_res.scalars().all()
+        b_dict = BillResponse.model_validate(b)
+        b_dict.items = [
+            {
+                "id": it.id,
+                "product_id": it.product_id,
+                "product_name": it.product_name,
+                "quantity": it.quantity,
+                "unit_price": it.unit_price,
+                "total_price": it.total_price
+            } for it in items
+        ]
+        bills_list.append(b_dict)
+
+    res_data = CustomerDetailResponse.model_validate(customer)
+    res_data.bills = bills_list
+    return res_data
+
+
+@router.post("/customers/{customer_id}/udhar-payment")
+async def pay_udhar(
+    customer_id: str,
+    data: UdharPaymentCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Customer).where(Customer.id == customer_id, Customer.organization_id == current_user.organization_id)
+    )
+    customer = result.scalar_one_or_none()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    if data.amount > customer.credit_balance:
+        customer.credit_balance = 0.0
+    else:
+        customer.credit_balance -= data.amount
+        
+    await db.commit()
+    await db.refresh(customer)
+    return {"status": "success", "new_credit_balance": customer.credit_balance}
+
+
+# --- Reports ---
+@router.get("/reports/summary", response_model=ReportSummaryResponse)
+async def get_reports_summary(
+    timeframe: str = "7d",
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    bills_res = await db.execute(
+        select(Bill).where(Bill.organization_id == current_user.organization_id).order_by(Bill.created_at.asc())
+    )
+    bills = bills_res.scalars().all()
+
+    total_sales = sum(b.total_amount for b in bills)
+    total_bills = len(bills)
+    avg_order = (total_sales / total_bills) if total_bills > 0 else 0.0
+
+    cust_res = await db.execute(
+        select(Customer).where(Customer.organization_id == current_user.organization_id)
+    )
+    customers = cust_res.scalars().all()
+    total_udhar = sum(c.credit_balance for c in customers)
+
+    # Payment Mode breakdown
+    mode_counts = {}
+    mode_amounts = {}
+    for b in bills:
+        mode = b.payment_mode or "Cash"
+        mode_counts[mode] = mode_counts.get(mode, 0) + 1
+        mode_amounts[mode] = mode_amounts.get(mode, 0.0) + b.total_amount
+
+    payment_modes = [
+        PaymentModeSummary(mode=m, amount=mode_amounts[m], count=mode_counts[m])
+        for m in mode_counts
+    ]
+
+    # Top products aggregation from bill items
+    bill_ids = [b.id for b in bills]
+    prod_sales = {}
+    if bill_ids:
+        items_res = await db.execute(select(BillItem).where(BillItem.bill_id.in_(bill_ids)))
+        items = items_res.scalars().all()
+        for it in items:
+            p_id = it.product_id
+            if p_id not in prod_sales:
+                prod_sales[p_id] = {"name": it.product_name, "units": 0, "rev": 0.0}
+            prod_sales[p_id]["units"] += it.quantity
+            prod_sales[p_id]["rev"] += it.total_price
+
+    sorted_prods = sorted(prod_sales.items(), key=lambda x: x[1]["rev"], reverse=True)[:5]
+    top_products = [
+        TopProductSummary(
+            product_id=pid,
+            product_name=pdata["name"],
+            units_sold=pdata["units"],
+            revenue=pdata["rev"]
+        )
+        for pid, pdata in sorted_prods
+    ]
+
+    # Timeline points by date
+    timeline_dict = {}
+    for b in bills:
+        d_str = b.created_at.strftime("%Y-%m-%d")
+        if d_str not in timeline_dict:
+            timeline_dict[d_str] = {"sales": 0.0, "orders": 0}
+        timeline_dict[d_str]["sales"] += b.total_amount
+        timeline_dict[d_str]["orders"] += 1
+
+    timeline = [
+        SalesTimelinePoint(date=d, sales=data["sales"], orders=data["orders"])
+        for d, data in sorted(timeline_dict.items())
+    ]
+
+    return ReportSummaryResponse(
+        total_sales=total_sales,
+        total_bills=total_bills,
+        avg_order_value=round(avg_order, 2),
+        total_udhar_pending=total_udhar,
+        payment_modes=payment_modes,
+        top_products=top_products,
+        timeline=timeline
+    )
 
 
 # --- Billing / POS ---
@@ -251,12 +440,19 @@ async def create_bill(
 
 @router.get("/bills", response_model=List[BillResponse])
 async def list_bills(
+    search: Optional[str] = None,
+    payment_mode: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(Bill).where(Bill.organization_id == current_user.organization_id).order_by(Bill.created_at.desc())
-    )
+    query = select(Bill).where(Bill.organization_id == current_user.organization_id)
+    if search:
+        query = query.where(Bill.invoice_number.ilike(f"%{search}%"))
+    if payment_mode:
+        query = query.where(Bill.payment_mode == payment_mode)
+
+    query = query.order_by(Bill.created_at.desc())
+    result = await db.execute(query)
     bills = result.scalars().all()
     res = []
     for b in bills:
@@ -275,3 +471,4 @@ async def list_bills(
         ]
         res.append(b_dict)
     return res
+

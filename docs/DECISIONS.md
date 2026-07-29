@@ -55,11 +55,16 @@
 
 ---
 
-## Decision 006: Direct SQLite Seed Script for Development User Creation
-- **Date**: 2026-07-27
-- **Problem**: Cannot use the registration API to create test users when the backend itself is unstable (CORS errors, 500 crashes from missing aiosqlite). Need a way to create users that bypasses the entire API stack.
-- **Alternatives Considered**: Use Swagger UI manually; fix API first then register.
-- **Chosen Solution**: `seed_user.py` — writes directly to `storemind.db` using the `sqlite3` standard library and `bcrypt` directly.
-- **Reason**: Zero dependencies on API stability. Works even if FastAPI is not running. Idempotent (checks for existing email before inserting).
-- **Tradeoffs**: Must be run after backend has started at least once (to create DB tables via SQLAlchemy lifespan).
-- **Future Impact**: Useful for demos, testing, and CI seeding. Can be extended to seed products, categories, etc.
+## Decision 007: Modular Dual-Role Login Portal with Auto Role-Based Redirection
+- **Date**: 2026-07-29
+- **Problem**: Need seamless authorization portal for Super Admins and Store Managers while enforcing secure role boundaries.
+- **Chosen Solution**: `LoginPortal.jsx` with tab switcher between Merchant Sign In and Super Admin Sign In, wired with one-click test credential fill buttons (`admin@storemind.com` & `TEST_SUPERMART1@GMAIL.COM`).
+- **Reason**: Simplifies testing and provides clean entry points from main website into respective SaaS consoles.
+
+---
+
+## Decision 008: Offline-First Hybrid Sync Engine & Edge AI Micro-Inference Fallback
+- **Date**: 2026-07-29
+- **Problem**: Indian Kirana retail stores experience frequent internet outages; POS billing and produce scanning must never stall due to network loss.
+- **Chosen Solution**: Client-side `syncEngine.js` with `navigator.onLine` detector that queues offline transactions in `localStorage` and pushes batch payloads to FastAPI `/api/v1/sync/push` upon reconnection. Edge AI fallback provider (`edgeAiClient.js` & `edge_ai.py`) executes local ONNX micro-inference for YOLO object detection & Whisper voice billing.
+- **Reason**: Zero downtime for Kirana checkout counters, low latency, and automatic cloud synchronization.

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine, Base
-from app.api.v1 import auth, mart, ai
+from app.api.v1 import auth, mart, ai, admin, sync
 
 
 @asynccontextmanager
@@ -43,6 +43,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(mart.router, prefix="/api/v1/mart", tags=["Mart Management"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI Services"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin Portal"])
+app.include_router(sync.router, prefix="/api/v1/sync", tags=["Offline Sync Engine"])
 
 
 @app.get("/api/health")

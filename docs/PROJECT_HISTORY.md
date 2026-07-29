@@ -160,3 +160,108 @@
   6. Build Reports page (UI-002)
 
 ================================================
+
+================================================
+
+## Session #4
+- **Date**: 2026-07-27
+- **Developer/Agent**: Kiro AI
+- **Objective**: Push project to GitHub, set up .gitignore, handle security incident with exposed token, provide run instructions.
+- **Prompt(s) Given**:
+  > "push to github"
+  > "https://github.com/Shehjad-11/FYR_PRO.git"
+  > "lets run the project"
+  > "Update the project memory..."
+
+- **Discussion Summary**:
+  - `.gitignore` created to exclude secrets, DB files, node_modules, and build artifacts before any push.
+  - `push_to_github.bat` updated with new repo URL `https://github.com/Shehjad-11/FYR_PRO.git`.
+  - User accidentally pasted a live GitHub Personal Access Token in chat — immediately flagged, user advised to revoke at github.com/settings/tokens.
+  - Run instructions provided for both backend and frontend via CMD.
+  - Project version tagged as v0.3.1 for this GitHub push milestone.
+
+- **Decisions Made**: None new — operational session only.
+
+- **Files Created**:
+  - `.gitignore`
+
+- **Files Modified**:
+  - `push_to_github.bat` — updated repo URL and commit message
+
+- **Security Incident**:
+  - Token `github_pat_11BLAUQUA0...` was exposed in chat.
+  - User instructed to revoke immediately at https://github.com/settings/tokens.
+  - New token should be generated before next push.
+
+- **Commands to Run**:
+  ```cmd
+  cd /d "e:\BTECH COLLAGE\SEM PROJECTS\SEM 7 & 8\FINAL YEAR PROJECT\backend"
+  pip install aiosqlite
+  python -m uvicorn app.main:app --reload --port 8000
+  ```
+  ```cmd
+  cd /d "e:\BTECH COLLAGE\SEM PROJECTS\SEM 7 & 8\FINAL YEAR PROJECT\frontend"
+  node node_modules\vite\bin\vite.js
+  ```
+
+- **Packages Installed**: None.
+- **Errors Encountered**: None (operational session).
+- **Features Completed**: GIT-001 (gitignore + push setup).
+- **Next Steps**:
+  1. Revoke exposed token at https://github.com/settings/tokens
+  2. Generate new token with `repo` scope
+  3. Run `push_to_github.bat` with new credentials
+  4. Login at http://localhost:5173 with `TEST_SUPERMART1@GMAIL.COM` / `Test@1234`
+  5. Begin QUAL-001 full end-to-end test
+  6. Build UI-002 Reports page
+
+================================================
+
+## Session #5
+- **Date**: 2026-07-29
+- **Developer/Agent**: Antigravity AI
+- **Objective**: Execute the Master Build Plan across all 5 Phases (25 tasks total) to complete StoreMind Pro.
+- **Prompt(s) Given**:
+  - Master Build Plan execution directives ("YES START WITH PHASE 2", "HOVE COMPLETED ALL 10 MENTION IN THI", "OK PHASE 4", "PHASE 5", strict verification audit requests).
+- **Discussion Summary**:
+  - Implemented Phase 1: Complete Merchant Core (`UI-002` to `UI-006`). Built Reports page, Product edit/delete modals, Customer detail & Udhar repayment form, Bill history & printable digital tax receipt modal, low-stock navbar notifications.
+  - Implemented Phase 2: Admin Panel (`ADM-001` to `ADM-005`). Built Executive MRR/ARR SaaS dashboard, Merchant directory & status toggle API, Subscription tiers, AI usage & compute cost tracking, and Platform health port matrix.
+  - Implemented Phase 3: Main Website (`WEB-001` to `WEB-007`). Built customer marketing website with Home, About Us, Solutions, Pricing (monthly/yearly toggle), AI Showcase, Blog, and Contact Us pages.
+  - Implemented Phase 4: Dual-Role Login Portal (`LOG-001` to `LOG-004`). Built LoginPortal.jsx for Super Admin (`admin@storemind.com`) & Merchant (`TEST_SUPERMART1@GMAIL.COM`) logins with role-based redirection router in App.jsx.
+  - Implemented Phase 5: Offline Setup & Edge AI (`OFF-001` to `OFF-004`). Built Standalone Download page (`LandingDownload.jsx`), Windows offline installer script (`build_offline_installer.bat`), Bi-directional data sync engine (`syncEngine.js` & `sync.py`), and Edge AI micro-inference provider (`edgeAiClient.js` & `edge_ai.py`).
+- **Files Created**:
+  - `MASTER_BUILD_PLAN.md`
+  - `backend/app/api/v1/admin.py`
+  - `backend/app/api/v1/sync.py`
+  - `backend/app/core/edge_ai.py`
+  - `frontend/src/pages/Reports.jsx`
+  - `frontend/src/pages/BillHistory.jsx`
+  - `frontend/src/pages/AdminDashboard.jsx`
+  - `frontend/src/pages/LoginPortal.jsx`
+  - `frontend/src/pages/website/MainWebsite.jsx`
+  - `frontend/src/pages/website/LandingHome.jsx`
+  - `frontend/src/pages/website/LandingAbout.jsx`
+  - `frontend/src/pages/website/LandingSolutions.jsx`
+  - `frontend/src/pages/website/LandingPricing.jsx`
+  - `frontend/src/pages/website/LandingAIShowcase.jsx`
+  - `frontend/src/pages/website/LandingBlog.jsx`
+  - `frontend/src/pages/website/LandingContact.jsx`
+  - `frontend/src/pages/website/LandingDownload.jsx`
+  - `frontend/src/components/website/LandingNavbar.jsx`
+  - `frontend/src/components/website/LandingFooter.jsx`
+  - `frontend/src/services/syncEngine.js`
+  - `frontend/src/services/edgeAiClient.js`
+  - `build_offline_installer.bat`
+- **Files Modified**:
+  - `backend/app/schemas/mart.py`
+  - `backend/app/api/v1/mart.py`
+  - `backend/app/main.py`
+  - `frontend/src/services/api.js`
+  - `frontend/src/pages/Inventory.jsx`
+  - `frontend/src/pages/Customers.jsx`
+  - `frontend/src/components/Navbar.jsx`
+  - `frontend/src/components/Sidebar.jsx`
+  - `frontend/src/App.jsx`
+- **Features Completed**: All 25 Master Build Plan tasks across Phases 1-5 (100% Complete).
+
+================================================

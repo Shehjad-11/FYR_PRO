@@ -113,3 +113,43 @@ class BillResponse(BaseModel):
     items: List[BillItemResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# --- Udhar & Reports ---
+class UdharPaymentCreate(BaseModel):
+    amount: float = Field(..., gt=0.0)
+    note: Optional[str] = None
+
+
+class CustomerDetailResponse(CustomerResponse):
+    bills: List[BillResponse] = []
+
+
+class PaymentModeSummary(BaseModel):
+    mode: str
+    amount: float
+    count: int
+
+
+class TopProductSummary(BaseModel):
+    product_id: str
+    product_name: str
+    units_sold: int
+    revenue: float
+
+
+class SalesTimelinePoint(BaseModel):
+    date: str
+    sales: float
+    orders: int
+
+
+class ReportSummaryResponse(BaseModel):
+    total_sales: float
+    total_bills: int
+    avg_order_value: float
+    total_udhar_pending: float
+    payment_modes: List[PaymentModeSummary] = []
+    top_products: List[TopProductSummary] = []
+    timeline: List[SalesTimelinePoint] = []
+

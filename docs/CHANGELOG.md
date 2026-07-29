@@ -42,3 +42,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All frontend pages restyled: `Dashboard.jsx`, `Billing.jsx`, `Inventory.jsx`, `Customers.jsx`, `AIInsights.jsx`, `Login.jsx`, `Register.jsx`, `Navbar.jsx`, `Sidebar.jsx`.
 - `App.jsx` cleaned up and simplified.
 - `docs/STATUS_REPORT.md` added as new doc file.
+
+## [v0.4.0] - 2026-07-29
+
+### Added
+- **Phase 1 (Merchant Core)**: Built `Reports.jsx` (Recharts charts, CSV export), Product Edit/Delete modals in `Inventory.jsx`, Customer Detail View & Udhar Repayment Form Modal in `Customers.jsx`, `BillHistory.jsx` with printable digital tax invoice receipt modal, and Low Stock Notifications Popover Dropdown in `Navbar.jsx`.
+- **Phase 2 (Admin Panel)**: Built `AdminDashboard.jsx` & `admin.py` with 5 sub-tabs (Executive Dashboard, Merchant Management & Status Toggle, Subscription Tiers, AI Usage & Compute Costs, Platform Health & Microservices port matrix).
+- **Phase 3 (Main Website)**: Built complete customer marketing site (`MainWebsite.jsx`, `LandingHome`, `LandingAbout`, `LandingSolutions`, `LandingPricing`, `LandingAIShowcase`, `LandingBlog`, `LandingContact`).
+- **Phase 4 (Login Portal)**: Built `LoginPortal.jsx` for Super Admin (`admin@storemind.com`) & Store Manager (`TEST_SUPERMART1@GMAIL.COM`) with role-based redirection in `App.jsx`.
+- **Phase 5 (Offline Setup)**: Built `LandingDownload.jsx`, `build_offline_installer.bat`, `syncEngine.js` & `sync.py` bi-directional data sync router, and `edgeAiClient.js` & `edge_ai.py` Edge AI micro-inference provider.
+

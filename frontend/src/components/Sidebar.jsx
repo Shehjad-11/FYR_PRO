@@ -1,13 +1,15 @@
 import React from 'react';
-import { LayoutDashboard, ShoppingCart, Package, Users, BrainCircuit, Receipt } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, Users, BrainCircuit, Receipt, BarChart3, ShieldCheck } from 'lucide-react';
 
 const menuItems = [
-  { id: 'dashboard',   label: 'Dashboard',       icon: LayoutDashboard },
-  { id: 'billing',     label: 'POS Billing',      icon: ShoppingCart,  badge: 'Fast' },
-  { id: 'inventory',   label: 'Inventory',        icon: Package },
-  { id: 'customers',   label: 'Customers / CRM',  icon: Users },
-  { id: 'ai-insights', label: 'AI Insights',      icon: BrainCircuit },
-  { id: 'reports',     label: 'Sales Reports',    icon: Receipt },
+  { id: 'dashboard',       label: 'Dashboard',       icon: LayoutDashboard },
+  { id: 'billing',         label: 'POS Billing',      icon: ShoppingCart,  badge: 'Fast' },
+  { id: 'inventory',       label: 'Inventory',        icon: Package },
+  { id: 'customers',       label: 'Customers / CRM',  icon: Users },
+  { id: 'reports',         label: 'Sales Reports',    icon: BarChart3 },
+  { id: 'bill-history',    label: 'Bill History',     icon: Receipt },
+  { id: 'ai-insights',     label: 'AI Insights',      icon: BrainCircuit },
+  { id: 'admin-dashboard', label: 'Admin Console',    icon: ShieldCheck,   badge: 'SaaS' },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
